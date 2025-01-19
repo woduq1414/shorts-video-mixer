@@ -43,7 +43,7 @@ def make_parallel_video(video_list, time_diff_list):
         [video_list]
     )
 
-    combined.write_videofile("project/discord/output/combined.mp4", threads=10, fps=24, preset='ultrafast')
+    combined.write_videofile(f"project/{project_name}/output/parallel.mp4", threads=10, fps=24, preset='ultrafast')
 
 
 def make_crossed_video(video_list: list[VideoFileClip], time_diff_list, beat_times):
@@ -68,26 +68,33 @@ def make_crossed_video(video_list: list[VideoFileClip], time_diff_list, beat_tim
     print(interval, "interval")
 
     f = True
+    prev_info = {}
     while f and clip_end < longest_video_duration:
         for idx, video in enumerate(video_list):
             clip_start = origin_t - time_diff_list[idx]
             clip_end = min(origin_t + interval - time_diff_list[idx] + 0.6, video.duration)
             if clip_start >= video.duration or clip_start < 0:
+
                 continue
 
+            if prev_info.get("idx") == idx and prev_info.get("clip_start") == clip_start and prev_info.get(
+                    "clip_end") == clip_end:
+                f = False
+                break
+            prev_info = {"clip_start": clip_start, "clip_end": clip_end, "idx": idx}
             if clip_end - clip_start < 0.4:
                 continue
+            print(f"clip_start: {clip_start}, clip_end: {clip_end}, idx: {idx}")
 
-            print(clip_start, clip_end)
 
             video_clip = video.subclipped(clip_start, clip_end).with_start(origin_t - beat_times[0]).with_effects(
                 [vfx.CrossFadeIn(0.4), vfx.CrossFadeOut(0.4)])
             video_file_name = video.filename.split("/")[-1]
-            video_author = video_file_name.split("@")[1].split("_")[0]
+            video_author = "__".join(video_file_name.split("@")[1].split("__")[:-1])
 
             #
             txt_clip = TextClip(
-                text="@" + video_author, font=r"E:\develop\shorts-video-mixer\NanumYeBbeunMinGyeongCe.ttf",
+                text="@" + video_author, font=r"NanumYeBbeunMinGyeongCe.ttf",
                 color='#FFFFFF88',
                 font_size=80, method='caption', text_align='center', size=(720, 400),
             )
@@ -115,7 +122,7 @@ def make_crossed_video(video_list: list[VideoFileClip], time_diff_list, beat_tim
 
     final = final.with_effects([vfx.FadeIn(1), vfx.FadeOut(2), afx.AudioFadeOut("00:00:02")])
 
-    final.write_videofile(f"project/{project_name}/output/concated.mp4", threads=10, fps=30, preset='ultrafast',
+    final.write_videofile(f"project/{project_name}/output/mixed.mp4", threads=10, fps=30, preset='ultrafast',
                           ffmpeg_params=["-loglevel", "quiet"])
 
 

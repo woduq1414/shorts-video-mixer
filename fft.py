@@ -16,14 +16,10 @@ frequencies = np.fft.rfftfreq(n_fft, 1 / sr)
 
 
 def get_magnitude(sig, sr):
-    # calculate duration hop length and window in seconds
-    hop_length_duration = float(hop_length) / sr
-    n_fft_duration = float(n_fft) / sr
 
-    # STFT
     stft = librosa.stft(sig, n_fft=n_fft, hop_length=hop_length)
 
-    # 복소공간 값 절댓값 취하기
+
     magnitude = np.abs(stft)
 
     return magnitude
