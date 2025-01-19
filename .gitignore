@@ -180,6 +180,8 @@ test.py
 *.mp3
 *.mp4
 
+*.ipynb
+
 project/
 
 
